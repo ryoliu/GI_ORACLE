@@ -1,0 +1,59 @@
+---
+name: oracle-gi-installer
+description: 規劃、產生及檢查 Oracle Grid Infrastructure 單機環境、Oracle Restart、ASM 與單機 Oracle Database 的簡短 Bash 安裝腳本。適用於分階段安裝、前置檢查、設定與安裝後檢查；不適用於 RAC。
+---
+
+# Oracle GI Installer
+
+此 Skill 用於建立 Oracle Grid Infrastructure 單機環境、Oracle Restart、ASM 與單機 Oracle Database 的安裝腳本。
+
+## 適用範圍
+
+- Oracle Grid Infrastructure Standalone Server
+- Oracle Restart
+- Oracle ASM
+- Single Instance Oracle Database
+- Silent installation
+
+RAC、RAC One Node、Oracle Appliance 與雲端代管資料庫不屬於此 Skill 的範圍。
+
+## 使用流程
+
+1. 先確認 `GI_Setup.conf` 的 `ENVIRONMENT`。
+2. 當 `ENVIRONMENT="PERSONAL_LAB"` 時，必須讀取 [個人環境特別注意事項](references/personal-environment.md)，並優先套用其中的 LAB 例外規則。
+3. 產生腳本前，讀取 [必要輸入資料](references/required-inputs.md)。
+4. 規劃或產生完整安裝流程時，讀取 [安裝流程](references/installation-flow.md)。
+5. 檢查腳本時，讀取 [驗證規則](references/validation-rules.md)。
+6. 安裝前使用 [安裝前檢查清單](checklists/pre-install.md)。
+7. 安裝完成後使用 [安裝後檢查清單](checklists/post-install.md)。
+8. 腳本範本存放於 `templates` 目錄。
+
+## 基本原則
+
+- 使用繁體中文說明。
+- 所有程式碼、變數、函式、註解及腳本輸出使用英文。
+- 腳本保持簡短、簡單及容易閱讀。
+- 使用 Bash，並遵循專案 `AGENTS.md` 的錯誤處理、冪等性及顏色輸出規則。
+- 環境設定集中放在 `GI_Setup.conf`，不得儲存密碼。
+- 個人 LAB 可以依 `personal-environment.md` 將 RU 與 OPatch 留空；不得因此讓 PreCheck 失敗。
+- 不得猜測磁碟、目錄、帳號、群組、主機名稱或資料庫名稱。
+- 產生腳本不代表可以執行安裝或修改主機。
+- 未取得明確授權時，不得格式化磁碟、清除 ASM Header、刪除資料庫、移除 Oracle Home、關閉 SELinux、關閉 Firewall 或重新啟動主機。
+
+## 標準輸出
+
+```text
+GI_Setup.conf
+00_PreCheck.sh
+01_PreInstall.sh
+02_InstallGI.sh
+03_ConfigGI.sh
+04_InstallDatabaseSoftware.sh
+05_CreateListener.sh
+06_CreateDatabase.sh
+07_ConfigDatabase.sh
+08_CreateTnsnames.sh
+09_PostCheck.sh
+```
+
+只建立使用者要求的檔案或修改範圍。若必要輸入不足，先列出缺少的資料，不產生可直接執行且含猜測值的腳本。
