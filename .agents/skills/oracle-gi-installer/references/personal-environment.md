@@ -58,6 +58,15 @@ DB_SOFTWARE="/software/LINUX.X64_193000_db_home.zip"
 
 此規則僅為個人測試環境的例外，不應自動套用至正式環境。
 
+## 記憶體例外
+
+個人 LAB 環境允許使用最少 4 GB RAM 進行安裝練習。
+
+- `00_PreCheck.sh` 在 RAM 達到 4096 MB 時可以通過記憶體檢查。
+- Swap 仍依腳本中的 LAB 規則檢查。
+- 此設定只用於資源有限的個人測試環境，不代表 Oracle 正式環境的最低需求。
+- 正式環境、UAT、公司環境或客戶環境不得套用此例外。
+
 ## Oracle Linux 相容性
 
 若 Oracle 19.3 Base Software 安裝於較新的 Oracle Linux 版本，可能出現 prerequisite 或相容性警告。
