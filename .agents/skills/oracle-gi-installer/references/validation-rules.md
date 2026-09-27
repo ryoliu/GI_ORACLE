@@ -12,7 +12,8 @@
 - 所有 Shell 必須通過 `bash -n`。
 - 使用 `set -e`、`set -u` 與 `set -o pipefail`。
 - 只使用系統內建工具、目標 OS 已具備的標準工具，以及指定 Oracle 安裝媒體或 Oracle Home 提供的工具。
-- 必須檢查目前執行帳號。
+- 每支正式 Shell Script 必須指定單一執行帳號，並檢查目前帳號。
+- 不得在 Script 內使用 `su`、`runuser` 或 `sudo` 自動切換帳號。
 - 必須檢查目前階段需要的設定變數。
 - 不得輸出密碼或其他機密資訊。
 

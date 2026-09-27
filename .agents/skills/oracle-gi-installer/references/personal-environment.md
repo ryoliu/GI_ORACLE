@@ -78,7 +78,7 @@ RAM < 4096 MB
 ```
 
 - 4 GB 到 8 GB 之間不得顯示為符合 Oracle prerequisite，只能顯示 LAB warning。
-- Swap 例外必須另外定義，不得由記憶體例外自動推導。
+- 目前未定義 Swap 例外，必須使用標準 Swap 規則，不得由記憶體例外自動推導。
 - 正式環境、UAT、公司環境或客戶環境不得套用此例外。
 
 ## Oracle Linux 相容性
