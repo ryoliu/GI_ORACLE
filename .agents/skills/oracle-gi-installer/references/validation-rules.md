@@ -1,30 +1,13 @@
 # 驗證規則
 
-## 驗證原則
-
-- 檢查保持必要且精簡，不進行過度驗證。
-- 遵循「檢查目前狀態、必要時修改、驗證結果」。
-- 已符合需求時顯示略過，不重複修改。
-- 現有設定與預期衝突時，顯示錯誤並停止，不自動覆蓋。
+一般 Shell 程式標準、錯誤處理、冪等性、相依工具、語法檢查及顏色輸出依專案 `AGENTS.md`。本文件只定義 Oracle GI 安裝的技術驗證與安全規則。
 
 ## Shell 檢查
 
-- 所有 Shell 必須通過 `bash -n`。
-- 使用 `set -e`、`set -u` 與 `set -o pipefail`。
-- 只使用系統內建工具、目標 OS 已具備的標準工具，以及指定 Oracle 安裝媒體或 Oracle Home 提供的工具。
-- 每支正式 Shell Script 必須指定單一執行帳號，並檢查目前帳號。
-- 不得在 Script 內使用 `su`、`runuser` 或 `sudo` 自動切換帳號。
+- Oracle 指令必須使用指定安裝媒體或 Oracle Home 提供的工具。
+- 必須檢查目前帳號符合 [安裝流程](installation-flow.md) 指定的執行帳號。
 - 必須檢查目前階段需要的設定變數。
 - 不得輸出密碼或其他機密資訊。
-
-## 顯示規則
-
-以下規則適用於所有正式產生的 Shell 程式，不受實際輸出目錄限制。`templates/` 目錄下的設計範本可以省略 ANSI 顏色及其他只影響輸出格式的程式碼。
-
-- 成功或通過使用綠色。
-- 警告使用黃色。
-- 錯誤或失敗使用紅色。
-- 使用簡單的 ANSI 顏色變數與 `printf` 或 `echo -e`。
 
 ## 安全檢查
 
@@ -39,4 +22,4 @@
 
 OS 套件、Kernel 需求、Installer 參數、Response File 與 DBCA 選項必須依指定 Oracle 版本的官方文件確認，不得直接沿用其他版本設定。
 
-當 `ENVIRONMENT="PERSONAL_LAB"` 時，必須同時套用 [個人環境特別注意事項](personal-environment.md)。LAB 例外不得覆蓋 OS 與 Oracle 版本相容性、必要 RU、OPatch、CPU 架構或 Installer 必要條件。
+當 `ENVIRONMENT="PERSONAL_LAB"` 時，只能套用 [個人環境特別注意事項](personal-environment.md) 明確定義的例外；未定義的項目仍使用標準規則。
