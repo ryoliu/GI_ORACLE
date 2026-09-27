@@ -18,7 +18,7 @@
 
 ## 顯示規則
 
-以下規則只適用於正式產生在 `output/` 目錄下的 Shell 程式。`templates/` 目錄下的設計範本可以省略 ANSI 顏色及其他只影響輸出格式的程式碼。
+以下規則適用於所有正式產生的 Shell 程式，不受實際輸出目錄限制。`templates/` 目錄下的設計範本可以省略 ANSI 顏色及其他只影響輸出格式的程式碼。
 
 - 成功或通過使用綠色。
 - 警告使用黃色。
@@ -38,4 +38,4 @@
 
 OS 套件、Kernel 需求、Installer 參數、Response File 與 DBCA 選項必須依指定 Oracle 版本的官方文件確認，不得直接沿用其他版本設定。
 
-當 `ENVIRONMENT="PERSONAL_LAB"` 時，必須同時套用 [個人環境特別注意事項](personal-environment.md)。RU 或 OPatch 留空只能顯示警告與 Skip 訊息，不得視為 PreCheck 失敗。正式環境不得套用此例外。
+當 `ENVIRONMENT="PERSONAL_LAB"` 時，必須同時套用 [個人環境特別注意事項](personal-environment.md)。LAB 例外不得覆蓋 OS 與 Oracle 版本相容性、必要 RU、OPatch、CPU 架構或 Installer 必要條件。

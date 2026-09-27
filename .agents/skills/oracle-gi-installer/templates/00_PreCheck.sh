@@ -62,6 +62,76 @@ if [ -z "${DB_SOFTWARE:-}" ]; then
     exit 1
 fi
 
+if [ -z "${GI_BASE_VERSION:-}" ]; then
+    echo "ERROR: GI_BASE_VERSION is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${GI_RU_VERSION:-}" ] || [ "$GI_RU_VERSION" = "CHANGE_ME" ]; then
+    echo "ERROR: GI_RU_VERSION is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${GI_RU:-}" ] || [ "$GI_RU" = "CHANGE_ME" ]; then
+    echo "ERROR: GI_RU is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${GI_OPATCH_VERSION:-}" ] || [ "$GI_OPATCH_VERSION" = "CHANGE_ME" ]; then
+    echo "ERROR: GI_OPATCH_VERSION is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${GI_OPATCH:-}" ] || [ "$GI_OPATCH" = "CHANGE_ME" ]; then
+    echo "ERROR: GI_OPATCH is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_BASE_VERSION:-}" ]; then
+    echo "ERROR: DB_BASE_VERSION is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_RU_VERSION:-}" ] || [ "$DB_RU_VERSION" = "CHANGE_ME" ]; then
+    echo "ERROR: DB_RU_VERSION is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_RU:-}" ] || [ "$DB_RU" = "CHANGE_ME" ]; then
+    echo "ERROR: DB_RU is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_OPATCH_VERSION:-}" ] || [ "$DB_OPATCH_VERSION" = "CHANGE_ME" ]; then
+    echo "ERROR: DB_OPATCH_VERSION is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_OPATCH:-}" ] || [ "$DB_OPATCH" = "CHANGE_ME" ]; then
+    echo "ERROR: DB_OPATCH is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${ASM_OSDBA_GROUP:-}" ]; then
+    echo "ERROR: ASM_OSDBA_GROUP is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${ASM_OSASM_GROUP:-}" ]; then
+    echo "ERROR: ASM_OSASM_GROUP is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_OSDBA_GROUP:-}" ]; then
+    echo "ERROR: DB_OSDBA_GROUP is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_OSRACDBA_GROUP:-}" ]; then
+    echo "ERROR: DB_OSRACDBA_GROUP is not configured in GI_Setup.conf."
+    exit 1
+fi
+
 if [ -z "${ASM_DISKGROUP_DATA_DISKS:-}" ]; then
     echo "ERROR: ASM_DISKGROUP_DATA_DISKS is not configured in GI_Setup.conf."
     exit 1
@@ -150,6 +220,17 @@ if [ "$MEM_MB" -lt 4096 ]; then
     echo "ERROR: At least 4 GB RAM is required."
     echo "Current RAM: ${MEM_MB} MB"
     exit 1
+elif [ "$MEM_MB" -lt 8192 ]; then
+    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
+        echo "WARNING: RAM is below the official 8 GB requirement."
+        echo "WARNING: Continue with the personal LAB exception."
+    else
+        echo "ERROR: At least 8 GB RAM is required."
+        echo "Current RAM: ${MEM_MB} MB"
+        exit 1
+    fi
+else
+    echo "OK: RAM = ${MEM_MB} MB"
 fi
 
 if [ "$MEM_MB" -le 16384 ]; then
@@ -166,7 +247,6 @@ if [ "$SWAP_MB" -lt "$REQUIRED_SWAP_MB" ]; then
     exit 1
 fi
 
-echo "OK: RAM  = ${MEM_MB} MB"
 echo "OK: Swap = ${SWAP_MB} MB"
 
 
@@ -210,61 +290,33 @@ echo "OK: Database installation file exists."
 
 
 # ============================================================
-# 9. Check optional patches
+# 9. Check patches
 # ============================================================
 
-echo "=== Check optional patches ==="
+echo "=== Check patches ==="
 
-if [ -z "${GI_RU:-}" ]; then
-    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
-        echo "WARNING: GI RU is not configured. Skip."
-    else
-        echo "ERROR: GI RU is required for $ENVIRONMENT."
-        exit 1
-    fi
-elif [ ! -e "$GI_RU" ]; then
+if [ ! -e "$GI_RU" ]; then
     echo "ERROR: GI RU path not found: $GI_RU"
     exit 1
 else
     echo "OK: GI RU path exists."
 fi
 
-if [ -z "${GI_OPATCH:-}" ]; then
-    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
-        echo "WARNING: GI OPatch is not configured. Skip."
-    else
-        echo "ERROR: GI OPatch is required for $ENVIRONMENT."
-        exit 1
-    fi
-elif [ ! -e "$GI_OPATCH" ]; then
+if [ ! -e "$GI_OPATCH" ]; then
     echo "ERROR: GI OPatch path not found: $GI_OPATCH"
     exit 1
 else
     echo "OK: GI OPatch path exists."
 fi
 
-if [ -z "${DB_RU:-}" ]; then
-    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
-        echo "WARNING: Database RU is not configured. Skip."
-    else
-        echo "ERROR: Database RU is required for $ENVIRONMENT."
-        exit 1
-    fi
-elif [ ! -e "$DB_RU" ]; then
+if [ ! -e "$DB_RU" ]; then
     echo "ERROR: Database RU path not found: $DB_RU"
     exit 1
 else
     echo "OK: Database RU path exists."
 fi
 
-if [ -z "${DB_OPATCH:-}" ]; then
-    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
-        echo "WARNING: Database OPatch is not configured. Skip."
-    else
-        echo "ERROR: Database OPatch is required for $ENVIRONMENT."
-        exit 1
-    fi
-elif [ ! -e "$DB_OPATCH" ]; then
+if [ ! -e "$DB_OPATCH" ]; then
     echo "ERROR: Database OPatch path not found: $DB_OPATCH"
     exit 1
 else

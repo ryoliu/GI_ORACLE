@@ -2,11 +2,13 @@
 
 - [ ] 已確認 Linux 發行版本、版本號與 CPU 架構
 - [ ] 已確認 GI 與 Database Base Software 完整版本
-- [ ] 非個人 LAB 已確認 GI RU、DB RU 與 OPatch；個人 LAB 留空時已確認會略過相關步驟
+- [ ] 已確認 GI RU、DB RU 與 OPatch 符合 OS 與 Oracle 版本相容性要求
 - [ ] 已確認使用 Oracle Restart，而不是 RAC
 - [ ] 已確認 Hostname、FQDN、IP 與名稱解析
 - [ ] 已確認 Grid Base、Grid Home、Oracle Base 與 Database Home
 - [ ] 已確認 `grid`、`oracle`、UID、GID 與所有 Oracle 群組
+- [ ] 已確認 `grid` 屬於 Database OSDBA 與 OSRACDBA，且 `oracle` 屬於 ASM OSDBA
+- [ ] 已確認 Database OSOPER 與 ASM OSOPER 是否需要啟用職責分離
 - [ ] 已確認 GI 與 Database 安裝媒體位置及完整性
 - [ ] 已確認必要套件的安裝來源
 - [ ] 已確認 ASM 管理方式與持久化裝置路徑

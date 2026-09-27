@@ -35,7 +35,7 @@ RAC、RAC One Node、Oracle Appliance 與雲端代管資料庫不屬於此 Skill
 - 腳本保持簡短、簡單及容易閱讀。
 - 使用 Bash，並遵循專案 `AGENTS.md` 的錯誤處理及冪等性規則；正式輸出程式另須遵循顏色輸出規則。
 - 環境設定集中放在 `GI_Setup.conf`，不得儲存密碼。
-- 個人 LAB 可以依 `personal-environment.md` 將 RU 與 OPatch 留空；不得因此讓 PreCheck 失敗。
+- 個人 LAB 可以依 `personal-environment.md` 放寬記憶體、Swap、效能及建議性設定，但不得放寬 OS 與 Oracle 版本相容性、必要 RU、OPatch、CPU 架構或 Installer 必要條件。
 - 不得猜測磁碟、目錄、帳號、群組、主機名稱或資料庫名稱。
 - 產生腳本不代表可以執行安裝或修改主機。
 - 未取得明確授權時，不得格式化磁碟、清除 ASM Header、刪除資料庫、移除 Oracle Home、關閉 SELinux、關閉 Firewall 或重新啟動主機。

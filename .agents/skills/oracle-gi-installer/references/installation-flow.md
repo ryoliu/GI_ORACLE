@@ -17,6 +17,8 @@
 - 執行帳號：`root`
 - 安裝必要 OS 套件
 - 建立群組、`grid`、`oracle`、目錄及權限
+- 將 `grid` 加入 Database OSDBA 與 OSRACDBA，並將 `oracle` 加入 ASM OSDBA
+- 只有在使用者要求職責分離時才建立或指定 Database OSOPER 與 ASM OSOPER
 - 設定 Kernel Parameters、Limits 與持久化磁碟權限
 
 ## 02_InstallGI.sh

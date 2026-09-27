@@ -9,8 +9,9 @@
 - 確認使用 Oracle Restart，而不是 RAC
 - GI Base Software 完整版本
 - Database Base Software 完整版本
-- 正式環境、UAT、公司環境及客戶環境必須確認 GI RU、DB RU 與 OPatch 版本
-- 個人 LAB 的 RU 與 OPatch 可以留空；留空時必須依 [個人環境特別注意事項](personal-environment.md) 略過相關檢查與安裝步驟
+- GI RU、DB RU 與 OPatch 的版本及檔案位置
+- OS、Oracle Base、RU 與 OPatch 必須構成 Oracle 官方支援的安裝組合
+- 個人 LAB 不得略過版本相容性所需的 RU 或 OPatch；Oracle Linux 9 的要求依 [個人環境特別注意事項](personal-environment.md) 處理
 - 套件來源為線上 Repository 或離線安裝媒體
 
 ## 主機與網路
@@ -25,8 +26,24 @@
 ## 帳號與群組
 
 - `grid` 與 `oracle` 使用者名稱
-- Oracle Inventory、OSDBA、OSOPER、OSASM、ASMDBA 與 ASMOPER 群組
+- Oracle Inventory 群組
+- Database OSDBA 群組
+- Database OSRACDBA 群組
+- ASM OSDBA 群組
+- ASM OSASM 群組
 - 是否有固定 UID 與 GID 的要求
+
+下列職責分離群組為選用項目：
+
+- Database OSOPER 群組
+- ASM OSOPER 群組
+
+使用不同的 `grid` 與 `oracle` owner 時，必須確認下列 membership：
+
+- `grid` 必須屬於每個 Database 的 OSDBA 群組
+- `grid` 必須屬於 Database OSRACDBA 群組
+- `oracle` 必須屬於 ASM OSDBA 群組
+- Database owner 必須屬於 Database OSDBA 與 OSRACDBA 群組
 
 ## Oracle 路徑與安裝媒體
 
