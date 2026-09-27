@@ -95,7 +95,7 @@ DB_SOFTWARE="/software/LINUX.X64_193000_db_home.zip"
 例如：
 
 ```bash
-if [ -n "$GI_RU" ]; then
+if [ -n "${GI_RU:-}" ]; then
     if [ ! -f "$GI_RU" ]; then
         echo "ERROR: GI RU file not found: $GI_RU"
         exit 1

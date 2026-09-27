@@ -9,6 +9,8 @@
 - 執行帳號：`root`
 - 僅進行讀取與檢查，不修改主機
 - 檢查 OS、CPU、記憶體、Swap、Filesystem、Hostname、名稱解析、時間同步、套件、Kernel、Limits、帳號、群組、目錄、安裝媒體及 ASM 磁碟可見性
+- 套件、Kernel、Limits、帳號、群組及目錄若缺少且可由 `01_PreInstall.sh` 建立或設定，只顯示警告，不得阻止進入 PreInstall
+- 現有設定與預期衝突、平台不相容、必要安裝媒體缺失或 ASM 磁碟不可見時，顯示錯誤並停止
 
 ## 01_PreInstall.sh
 
