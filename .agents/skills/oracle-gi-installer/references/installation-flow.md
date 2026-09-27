@@ -28,9 +28,12 @@
 
 - 執行帳號：`grid`
 - 解壓或準備 GI 安裝媒體
+- 使用設定檔指定且相容的 OPatch 更新新建立的 Grid Home
+- 檢查 Grid Home 使用的 RU，並依指定版本的 Oracle 官方文件透過 `gridSetup.sh -applyRU` 套用
+- 只有在設定檔明確提供且官方文件要求時，才透過 `-applyOneOffs` 套用額外 One-off Patch
 - 建立符合指定版本的 Response File
 - 使用 Silent Mode 安裝 Oracle Restart
-- 清楚顯示後續需要由 `root` 執行的腳本
+- 顯示 Installer 要求的 `orainstRoot.sh` 與 Grid Home `root.sh` 完整路徑，然後停止並交接給 `root`
 
 不同版本的 `gridSetup.sh` 可能同時進行 Oracle Restart 或初始 ASM 設定。必須依指定版本的 Oracle 官方文件安排步驟，不可強制拆成不受支援的 Software-only 流程。
 
@@ -39,6 +42,7 @@
 - 執行帳號：`grid`
 - 執行前確認管理者已依 `02_InstallGI.sh` 顯示的指令，以 `root` 完成必要的 Root Script
 - 不得在此腳本中執行 Root Script 或切換至 `root`
+- 驗證 Grid Home 的 OPatch 與 RU Inventory 符合設定值
 - 設定與驗證 Oracle Restart
 - 建立安裝階段尚未建立的 ASM 資源或 Disk Group
 - 驗證 CRS、OHAS、ASM、Disk Group 與自動啟動狀態
@@ -47,9 +51,13 @@
 
 - 執行帳號：`oracle`
 - 解壓或準備 Database 安裝媒體
+- 使用設定檔指定且相容的 OPatch 更新新建立的 Database Home
+- 檢查套用至 Database Home 的 RU，並依指定版本的 Oracle 官方文件透過 `runInstaller -applyRU` 套用
+- 只有在設定檔明確提供且官方文件要求時，才透過 `-applyOneOffs` 套用額外 One-off Patch
 - 建立符合指定版本的 Response File
 - 使用 Silent Mode 執行 Software-only 安裝
-- 清楚顯示需要由 `root` 執行的腳本
+- 顯示 Installer 要求的 `orainstRoot.sh` 與 Database Home `root.sh` 完整路徑，然後停止並交接給 `root`
+- Root Script 完成前，不得執行 `06_CreateDatabase.sh`
 
 ## 05_CreateListener.sh
 
@@ -61,6 +69,8 @@
 ## 06_CreateDatabase.sh
 
 - 執行帳號：`oracle`
+- 執行前確認管理者已依 `04_InstallDatabaseSoftware.sh` 顯示的指令，以 `root` 完成必要的 Root Script
+- 驗證 Database Home 的 OPatch 與 RU Inventory 符合設定值
 - 使用 DBCA Silent Mode 建立 Database
 - 使用已確認的 CDB、PDB、Character Set、Memory、ASM 與密碼輸入方式
 - 將 Database 與 Service 註冊至 Oracle Restart
@@ -95,3 +105,14 @@
 不得將帳號切換隱藏在腳本內。交付時必須列出每個階段的執行帳號，以及 `root`、`grid`、`oracle` 之間的交接順序。
 
 Oracle 提供的 Root Script 必須由管理者在正式腳本之外明確執行。正式腳本只能顯示交接指令，不得代替管理者切換帳號或執行其他 owner 的操作。
+
+Database Software 與 DBCA 的必要交接順序為：
+
+```text
+04_InstallDatabaseSoftware.sh (oracle)
+-> Installer root scripts (root)
+-> Verify root scripts and Database Home patch inventory (oracle)
+-> 06_CreateDatabase.sh (oracle)
+```
+
+`05_CreateListener.sh` 可以安排在 Root Script 完成後、`06_CreateDatabase.sh` 之前執行，但不得取代上述 Root Script 完成條件。

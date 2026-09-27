@@ -1,5 +1,12 @@
 # 安裝後檢查清單
 
+本清單是整套 Oracle GI、Oracle Restart、ASM、Listener 與 Database 安裝流程的最終驗收清單，不代表所有項目都由 `09_PostCheck.sh` 重新執行。
+
+- Oracle Restart、OHAS、CRS、ASM 與 Disk Group 由 `03_ConfigGI.sh` 驗證。
+- Listener 與 Endpoint 由 `05_CreateListener.sh` 驗證。
+- Database、PDB、Service、ARCHIVELOG、FRA 與連線狀態由 `09_PostCheck.sh` 驗證。
+- 最終驗收應彙整各階段結果，不得讓 `09_PostCheck.sh` 切換成 `root` 或 `grid` 重跑其他 owner 的檢查。
+
 - [ ] Oracle Restart 服務正常
 - [ ] OHAS 與 CRS 資源狀態正常
 - [ ] ASM Instance 正常啟動

@@ -18,7 +18,7 @@ Oracle Linux 9 安裝 Oracle Database 19c 與 Oracle Grid Infrastructure 19c 時
 
 Oracle 19.3 Gold Image 只能作為 Base Software 來源，不得在 Oracle Linux 9 上略過必要 RU 後直接視為支援的安裝組合。
 
-`GI_Setup.conf` 必須提供 Base、RU 與 OPatch 的版本及位置：
+`GI_Setup.conf` 必須提供 Base、套用至各 Oracle Home 的 RU，以及相容 OPatch 的版本及位置：
 
 ```bash
 GI_BASE_VERSION="19.3.0.0.0"
@@ -33,6 +33,10 @@ DB_RU="CHANGE_ME"
 DB_OPATCH_VERSION="CHANGE_ME"
 DB_OPATCH="CHANGE_ME"
 ```
+
+`DB_RU_VERSION` 與 `DB_RU` 代表要套用至 Database Home 的 RU 版本與位置，不預先限定 Patch Bundle 名稱一定是 DBRU。實際應使用 DBRU、GIRU 或其他 Oracle 指定的 RU Bundle，必須依安裝拓撲與當時的 Oracle 官方文件決定。
+
+`DB_OPATCH_VERSION` 與 `DB_OPATCH` 代表用於更新 Database Home 的 OPatch，不得與 Grid Home 的 OPatch 設定混用。
 
 實際 RU 與 OPatch 版本必須依產生安裝套件當下的 Oracle 官方文件確認，不得只依固定範例版本判斷。
 
@@ -85,7 +89,7 @@ RAM < 4096 MB
 
 ## Script 處理原則
 
-對 RU 與 OPatch 採用簡單規則：
+對套用至 Grid Home 或 Database Home 的 RU 與 OPatch 採用簡單規則：
 
 ```text
 版本與路徑有設定
