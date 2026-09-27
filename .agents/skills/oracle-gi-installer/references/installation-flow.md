@@ -11,6 +11,7 @@
 - 執行帳號：`root`
 - 僅進行讀取與檢查，不修改主機
 - 檢查 OS、CPU、記憶體、Swap、Filesystem、Hostname、名稱解析、時間同步、套件、Kernel Version、Kernel Parameters、Limits、帳號、群組、目錄、安裝媒體及 ASM 磁碟可見性
+- `templates/00_PreCheck.sh` 與正式輸出必須依 [必要輸入資料](required-inputs.md) 檢查 `grid`、`oracle` 的 primary group 與必要 secondary group membership
 - 套件、Kernel Parameters、Limits、帳號、群組及目錄若缺少且可由 `01_PreInstall.sh` 建立或設定，只顯示警告，不得阻止進入 PreInstall
 - 現有設定與預期衝突、OS 或 Kernel Version 不符合必要條件、平台不相容、必要安裝媒體缺失或 ASM 磁碟不可見時，顯示錯誤並停止
 
@@ -19,7 +20,7 @@
 - 執行帳號：`root`
 - 安裝必要 OS 套件
 - 建立群組、`grid`、`oracle`、目錄及權限
-- 將 `grid` 加入 Database OSDBA 與 OSRACDBA，並將 `oracle` 加入 ASM OSDBA
+- 依 [必要輸入資料](required-inputs.md) 設定 `grid`、`oracle` 的 primary group 與必要 secondary group membership
 - 只有在使用者要求職責分離時才建立或指定 Database OSOPER 與 ASM OSOPER
 - 設定 Kernel Parameters、Limits 與持久化磁碟權限
 

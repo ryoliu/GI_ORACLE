@@ -7,8 +7,11 @@
 - [ ] 已確認 Hostname、FQDN、IP 與名稱解析
 - [ ] 已確認 Grid Base、Grid Home、Oracle Base 與 Database Home
 - [ ] 已確認 `grid`、`oracle`、UID、GID 與所有 Oracle 群組
-- [ ] 已確認 `grid` 屬於 Database OSDBA 與 OSRACDBA，且 `oracle` 屬於 ASM OSDBA
+- [ ] 已確認 `grid` 與 `oracle` 的 primary group 都是 Oracle Inventory / OINSTALL
+- [ ] 已確認 `grid` 屬於 ASM OSASM、ASM OSDBA、Database OSDBA 與 Database OSRACDBA
+- [ ] 已確認 `oracle` 屬於 Database OSDBA、Database OSRACDBA 與 ASM OSDBA
 - [ ] 已確認 Database OSOPER 與 ASM OSOPER 是否需要啟用職責分離
+- [ ] 啟用 OSOPER 職責分離時，已確認 owner 屬於對應的 OSOPER 群組
 - [ ] 已確認 GI 與 Database 安裝媒體位置及完整性
 - [ ] 已確認必要套件的安裝來源
 - [ ] 已確認 ASM 管理方式與持久化裝置路徑

@@ -38,12 +38,24 @@
 - Database OSOPER 群組
 - ASM OSOPER 群組
 
-使用不同的 `grid` 與 `oracle` owner 時，必須確認下列 membership：
+使用不同的 `grid` 與 `oracle` owner 時，必須確認下列 primary group 與 secondary group membership：
 
-- `grid` 必須屬於每個 Database 的 OSDBA 群組
-- `grid` 必須屬於 Database OSRACDBA 群組
-- `oracle` 必須屬於 ASM OSDBA 群組
-- Database owner 必須屬於 Database OSDBA 與 OSRACDBA 群組
+### Grid owner
+
+- Primary group：Oracle Inventory / OINSTALL
+- Secondary group：ASM OSASM
+- Secondary group：ASM OSDBA
+- Secondary group：每個 Database 的 OSDBA
+- Secondary group：每個 Database 的 OSRACDBA
+- 啟用 ASM OSOPER 職責分離時，還必須屬於 ASM OSOPER
+
+### Database owner
+
+- Primary group：Oracle Inventory / OINSTALL
+- Secondary group：Database OSDBA
+- Secondary group：Database OSRACDBA
+- Secondary group：ASM OSDBA
+- 啟用 Database OSOPER 職責分離時，還必須屬於 Database OSOPER
 
 ## Oracle 路徑與安裝媒體
 

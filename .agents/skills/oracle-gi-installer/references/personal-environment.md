@@ -57,22 +57,31 @@ DB_SOFTWARE="/software/LINUX.X64_193000_db_home.zip"
 
 ## 記憶體例外
 
-Oracle Grid Infrastructure 的正式最低記憶體要求為 8 GB。個人 LAB 可以在至少 4 GB RAM 時使用警告型例外繼續安裝練習。
+Oracle Grid Infrastructure 的正式最低記憶體要求為 8 GB。個人 LAB 可以在至少 4 GB RAM 時使用警告型例外繼續安裝練習。Swap 必須依下列規則判斷：
 
 ```text
-RAM >= 8192 MB
+RAM >= 8192 MB and RAM <= 16384 MB
     -> PASS
+    -> Swap >= RAM
 
-RAM >= 4096 MB and ENVIRONMENT=PERSONAL_LAB
+RAM > 16384 MB
+    -> PASS
+    -> Swap >= 16384 MB
+
+RAM >= 4096 MB and RAM < 8192 MB
+and ENVIRONMENT=PERSONAL_LAB
     -> WARNING
-    -> Allow LAB exception
+    -> Swap >= RAM
+    -> Allow PERSONAL_LAB exception
+    -> Does not meet the official RAM prerequisite
 
 RAM < 4096 MB
     -> ERROR
 ```
 
 - 4 GB 到 8 GB 之間不得顯示為符合 Oracle prerequisite，只能顯示 LAB warning。
-- 目前未定義 Swap 例外，必須使用標準 Swap 規則，不得由記憶體例外自動推導。
+- 4 GB 到 8 GB 的 `Swap >= RAM` 是 PERSONAL_LAB 規則，不代表符合 Oracle 官方 RAM prerequisite。
+- Swap 不符合上述門檻時，`00_PreCheck.sh` 必須顯示錯誤並停止。
 
 ## Script 處理原則
 
