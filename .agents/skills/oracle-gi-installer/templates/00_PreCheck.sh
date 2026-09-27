@@ -7,37 +7,6 @@ set -o pipefail
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 CONFIG_FILE="$SCRIPT_DIR/GI_Setup.conf"
 
-RED="\033[31m"
-GREEN="\033[32m"
-YELLOW="\033[33m"
-RESET="\033[0m"
-
-check_required_value() {
-    if [ -z "$2" ]; then
-        echo -e "${RED}ERROR: $1 is not configured in GI_Setup.conf.${RESET}"
-        exit 1
-    fi
-}
-
-check_optional_path() {
-    if [ -z "$2" ]; then
-        if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
-            echo -e "${YELLOW}WARNING: $1 is not configured. Skip.${RESET}"
-            return
-        fi
-
-        echo -e "${RED}ERROR: $1 is required for $ENVIRONMENT.${RESET}"
-        exit 1
-    fi
-
-    if [ ! -e "$2" ]; then
-        echo -e "${RED}ERROR: $1 path not found: $2${RESET}"
-        exit 1
-    fi
-
-    echo -e "${GREEN}OK: $1 path exists.${RESET}"
-}
-
 echo "=== Oracle GI / Database PreCheck ==="
 
 
@@ -48,11 +17,11 @@ echo "=== Oracle GI / Database PreCheck ==="
 echo "=== Check root user ==="
 
 if [ "$(id -u)" -ne 0 ]; then
-    echo -e "${RED}ERROR: This script must be run as root.${RESET}"
+    echo "ERROR: This script must be run as root."
     exit 1
 fi
 
-echo -e "${GREEN}OK: Running as root.${RESET}"
+echo "OK: Running as root."
 
 
 # ============================================================
@@ -62,21 +31,48 @@ echo -e "${GREEN}OK: Running as root.${RESET}"
 echo "=== Check configuration file ==="
 
 if [ ! -f "$CONFIG_FILE" ]; then
-    echo -e "${RED}ERROR: Configuration file not found: $CONFIG_FILE${RESET}"
+    echo "ERROR: Configuration file not found: $CONFIG_FILE"
     exit 1
 fi
 
 source "$CONFIG_FILE"
 
-check_required_value "ENVIRONMENT" "${ENVIRONMENT:-}"
-check_required_value "OS_MAJOR_VERSION" "${OS_MAJOR_VERSION:-}"
-check_required_value "HOST_NAME" "${HOST_NAME:-}"
-check_required_value "GI_SOFTWARE" "${GI_SOFTWARE:-}"
-check_required_value "DB_SOFTWARE" "${DB_SOFTWARE:-}"
-check_required_value "ASM_DISKGROUP_DATA_DISKS" "${ASM_DISKGROUP_DATA_DISKS:-}"
-check_required_value "ASM_DISKGROUP_FRA_DISKS" "${ASM_DISKGROUP_FRA_DISKS:-}"
+if [ -z "${ENVIRONMENT:-}" ]; then
+    echo "ERROR: ENVIRONMENT is not configured in GI_Setup.conf."
+    exit 1
+fi
 
-echo -e "${GREEN}OK: Configuration file loaded.${RESET}"
+if [ -z "${OS_MAJOR_VERSION:-}" ]; then
+    echo "ERROR: OS_MAJOR_VERSION is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${HOST_NAME:-}" ]; then
+    echo "ERROR: HOST_NAME is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${GI_SOFTWARE:-}" ]; then
+    echo "ERROR: GI_SOFTWARE is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${DB_SOFTWARE:-}" ]; then
+    echo "ERROR: DB_SOFTWARE is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${ASM_DISKGROUP_DATA_DISKS:-}" ]; then
+    echo "ERROR: ASM_DISKGROUP_DATA_DISKS is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+if [ -z "${ASM_DISKGROUP_FRA_DISKS:-}" ]; then
+    echo "ERROR: ASM_DISKGROUP_FRA_DISKS is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+echo "OK: Configuration file loaded."
 
 
 # ============================================================
@@ -85,21 +81,21 @@ echo -e "${GREEN}OK: Configuration file loaded.${RESET}"
 
 echo "=== Check hostname setting ==="
 
-if [ "$HOST_NAME" = "CHANGE_ME" ] || [ -z "$HOST_NAME" ]; then
-    echo -e "${RED}ERROR: HOST_NAME is not configured in GI_Setup.conf.${RESET}"
+if [ "$HOST_NAME" = "CHANGE_ME" ]; then
+    echo "ERROR: HOST_NAME is not configured in GI_Setup.conf."
     exit 1
 fi
 
 CURRENT_HOST_NAME=$(hostname -s)
 
 if [ "$CURRENT_HOST_NAME" != "$HOST_NAME" ]; then
-    echo -e "${RED}ERROR: Hostname does not match configuration.${RESET}"
+    echo "ERROR: Hostname does not match configuration."
     echo "Expected: $HOST_NAME"
     echo "Current : $CURRENT_HOST_NAME"
     exit 1
 fi
 
-echo -e "${GREEN}OK: HOST_NAME = $HOST_NAME${RESET}"
+echo "OK: HOST_NAME = $HOST_NAME"
 
 
 # ============================================================
@@ -109,20 +105,20 @@ echo -e "${GREEN}OK: HOST_NAME = $HOST_NAME${RESET}"
 echo "=== Check operating system ==="
 
 if [ ! -f /etc/oracle-release ]; then
-    echo -e "${RED}ERROR: Oracle Linux was not detected.${RESET}"
+    echo "ERROR: Oracle Linux was not detected."
     exit 1
 fi
 
 CURRENT_OS_MAJOR=$(sed -n 's/.*release \([0-9][0-9]*\).*/\1/p' /etc/oracle-release)
 
 if [ "$CURRENT_OS_MAJOR" != "$OS_MAJOR_VERSION" ]; then
-    echo -e "${RED}ERROR: Oracle Linux version does not match configuration.${RESET}"
+    echo "ERROR: Oracle Linux version does not match configuration."
     echo "Expected: Oracle Linux $OS_MAJOR_VERSION"
     echo "Current : $(cat /etc/oracle-release)"
     exit 1
 fi
 
-echo -e "${GREEN}OK: $(cat /etc/oracle-release)${RESET}"
+echo "OK: $(cat /etc/oracle-release)"
 
 
 # ============================================================
@@ -134,11 +130,11 @@ echo "=== Check architecture ==="
 ARCH=$(uname -m)
 
 if [ "$ARCH" != "x86_64" ]; then
-    echo -e "${RED}ERROR: x86_64 architecture is required.${RESET}"
+    echo "ERROR: x86_64 architecture is required."
     exit 1
 fi
 
-echo -e "${GREEN}OK: Architecture is $ARCH.${RESET}"
+echo "OK: Architecture is $ARCH."
 
 
 # ============================================================
@@ -151,7 +147,7 @@ MEM_MB=$(awk '/MemTotal/ {print int($2 / 1024)}' /proc/meminfo)
 SWAP_MB=$(awk '/SwapTotal/ {print int($2 / 1024)}' /proc/meminfo)
 
 if [ "$MEM_MB" -lt 4096 ]; then
-    echo -e "${RED}ERROR: At least 4 GB RAM is required.${RESET}"
+    echo "ERROR: At least 4 GB RAM is required."
     echo "Current RAM: ${MEM_MB} MB"
     exit 1
 fi
@@ -163,15 +159,15 @@ else
 fi
 
 if [ "$SWAP_MB" -lt "$REQUIRED_SWAP_MB" ]; then
-    echo -e "${RED}ERROR: Swap space is insufficient.${RESET}"
+    echo "ERROR: Swap space is insufficient."
     echo "RAM           : ${MEM_MB} MB"
     echo "Swap          : ${SWAP_MB} MB"
     echo "Required Swap : ${REQUIRED_SWAP_MB} MB"
     exit 1
 fi
 
-echo -e "${GREEN}OK: RAM  = ${MEM_MB} MB${RESET}"
-echo -e "${GREEN}OK: Swap = ${SWAP_MB} MB${RESET}"
+echo "OK: RAM  = ${MEM_MB} MB"
+echo "OK: Swap = ${SWAP_MB} MB"
 
 
 # ============================================================
@@ -183,12 +179,12 @@ echo "=== Check /tmp space ==="
 TMP_FREE_MB=$(df -Pm /tmp | awk 'NR==2 {print $4}')
 
 if [ "$TMP_FREE_MB" -lt 1024 ]; then
-    echo -e "${RED}ERROR: /tmp requires at least 1 GB free space.${RESET}"
+    echo "ERROR: /tmp requires at least 1 GB free space."
     echo "Current free space: ${TMP_FREE_MB} MB"
     exit 1
 fi
 
-echo -e "${GREEN}OK: /tmp free space = ${TMP_FREE_MB} MB${RESET}"
+echo "OK: /tmp free space = ${TMP_FREE_MB} MB"
 
 
 # ============================================================
@@ -198,19 +194,19 @@ echo -e "${GREEN}OK: /tmp free space = ${TMP_FREE_MB} MB${RESET}"
 echo "=== Check installation media ==="
 
 if [ ! -f "$GI_SOFTWARE" ]; then
-    echo -e "${RED}ERROR: Grid Infrastructure installation file not found:${RESET}"
+    echo "ERROR: Grid Infrastructure installation file not found:"
     echo "$GI_SOFTWARE"
     exit 1
 fi
 
 if [ ! -f "$DB_SOFTWARE" ]; then
-    echo -e "${RED}ERROR: Database installation file not found:${RESET}"
+    echo "ERROR: Database installation file not found:"
     echo "$DB_SOFTWARE"
     exit 1
 fi
 
-echo -e "${GREEN}OK: Grid Infrastructure installation file exists.${RESET}"
-echo -e "${GREEN}OK: Database installation file exists.${RESET}"
+echo "OK: Grid Infrastructure installation file exists."
+echo "OK: Database installation file exists."
 
 
 # ============================================================
@@ -219,10 +215,61 @@ echo -e "${GREEN}OK: Database installation file exists.${RESET}"
 
 echo "=== Check optional patches ==="
 
-check_optional_path "GI RU" "${GI_RU:-}"
-check_optional_path "GI OPatch" "${GI_OPATCH:-}"
-check_optional_path "Database RU" "${DB_RU:-}"
-check_optional_path "Database OPatch" "${DB_OPATCH:-}"
+if [ -z "${GI_RU:-}" ]; then
+    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
+        echo "WARNING: GI RU is not configured. Skip."
+    else
+        echo "ERROR: GI RU is required for $ENVIRONMENT."
+        exit 1
+    fi
+elif [ ! -e "$GI_RU" ]; then
+    echo "ERROR: GI RU path not found: $GI_RU"
+    exit 1
+else
+    echo "OK: GI RU path exists."
+fi
+
+if [ -z "${GI_OPATCH:-}" ]; then
+    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
+        echo "WARNING: GI OPatch is not configured. Skip."
+    else
+        echo "ERROR: GI OPatch is required for $ENVIRONMENT."
+        exit 1
+    fi
+elif [ ! -e "$GI_OPATCH" ]; then
+    echo "ERROR: GI OPatch path not found: $GI_OPATCH"
+    exit 1
+else
+    echo "OK: GI OPatch path exists."
+fi
+
+if [ -z "${DB_RU:-}" ]; then
+    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
+        echo "WARNING: Database RU is not configured. Skip."
+    else
+        echo "ERROR: Database RU is required for $ENVIRONMENT."
+        exit 1
+    fi
+elif [ ! -e "$DB_RU" ]; then
+    echo "ERROR: Database RU path not found: $DB_RU"
+    exit 1
+else
+    echo "OK: Database RU path exists."
+fi
+
+if [ -z "${DB_OPATCH:-}" ]; then
+    if [ "$ENVIRONMENT" = "PERSONAL_LAB" ]; then
+        echo "WARNING: Database OPatch is not configured. Skip."
+    else
+        echo "ERROR: Database OPatch is required for $ENVIRONMENT."
+        exit 1
+    fi
+elif [ ! -e "$DB_OPATCH" ]; then
+    echo "ERROR: Database OPatch path not found: $DB_OPATCH"
+    exit 1
+else
+    echo "OK: Database OPatch path exists."
+fi
 
 
 # ============================================================
@@ -234,15 +281,15 @@ echo "=== Check ASM disks ==="
 for DISK in $ASM_DISKGROUP_DATA_DISKS $ASM_DISKGROUP_FRA_DISKS
 do
     if [ ! -b "$DISK" ]; then
-        echo -e "${RED}ERROR: ASM disk not found or is not a block device: $DISK${RESET}"
+        echo "ERROR: ASM disk not found or is not a block device: $DISK"
         exit 1
     fi
 
-    echo -e "${GREEN}OK: $DISK${RESET}"
+    echo "OK: $DISK"
 done
 
 
 echo
-echo -e "${GREEN}============================================${RESET}"
-echo -e "${GREEN}PreCheck completed successfully.${RESET}"
-echo -e "${GREEN}============================================${RESET}"
+echo "============================================"
+echo "PreCheck completed successfully."
+echo "============================================"
