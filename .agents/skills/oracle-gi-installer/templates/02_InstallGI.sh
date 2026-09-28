@@ -24,16 +24,14 @@ fi
 source "$CONFIG_FILE"
 
 for VARIABLE_NAME in \
+    ENVIRONMENT \
+    ALLOW_UNSUPPORTED_19_3_BASE \
     GRID_OWNER \
     GRID_BASE \
     GRID_HOME \
     ORA_INVENTORY \
     GI_BASE_VERSION \
     GI_SOFTWARE \
-    GI_RU_VERSION \
-    GI_RU \
-    GI_OPATCH_VERSION \
-    GI_OPATCH \
     ASM_OSDBA_GROUP \
     ASM_OSASM_GROUP \
     ASM_DISCOVERY_STRING \
@@ -49,6 +47,38 @@ do
     fi
 done
 
+UNSUPPORTED_BASE_MODE="NO"
+
+case "$ALLOW_UNSUPPORTED_19_3_BASE" in
+    YES)
+        if [ "$ENVIRONMENT" != "PERSONAL_LAB" ]; then
+            echo "ERROR: ALLOW_UNSUPPORTED_19_3_BASE=YES is allowed only for PERSONAL_LAB."
+            exit 1
+        fi
+
+        UNSUPPORTED_BASE_MODE="YES"
+        echo "WARNING: Oracle 19.3 Base without RU is not supported on Oracle Linux 9."
+        ;;
+    NO)
+        for VARIABLE_NAME in \
+            GI_RU_VERSION \
+            GI_RU \
+            GI_OPATCH_VERSION \
+            GI_OPATCH
+        do
+            VARIABLE_VALUE="${!VARIABLE_NAME:-}"
+            if [ -z "$VARIABLE_VALUE" ] || [ "$VARIABLE_VALUE" = "CHANGE_ME" ]; then
+                echo "ERROR: $VARIABLE_NAME is required when ALLOW_UNSUPPORTED_19_3_BASE=NO."
+                exit 1
+            fi
+        done
+        ;;
+    *)
+        echo "ERROR: ALLOW_UNSUPPORTED_19_3_BASE must be YES or NO."
+        exit 1
+        ;;
+esac
+
 if [ "$(id -un)" != "$GRID_OWNER" ]; then
     echo "ERROR: Current user does not match GRID_OWNER: $GRID_OWNER"
     exit 1
@@ -60,7 +90,11 @@ fi
 
 echo "=== Check previous installation state ==="
 
-EXPECTED_STATE="$GI_BASE_VERSION|$GI_RU_VERSION|$GI_OPATCH_VERSION|$GRID_HOME"
+if [ "$UNSUPPORTED_BASE_MODE" = "YES" ]; then
+    EXPECTED_STATE="UNSUPPORTED_BASE|$GI_BASE_VERSION|$GRID_HOME"
+else
+    EXPECTED_STATE="$GI_BASE_VERSION|$GI_RU_VERSION|$GI_OPATCH_VERSION|$GRID_HOME"
+fi
 
 if [ -f "$STATE_FILE" ]; then
     CURRENT_STATE=$(cat "$STATE_FILE")
@@ -96,14 +130,18 @@ if [ ! -f "$GI_SOFTWARE" ]; then
     exit 1
 fi
 
-if [ ! -d "$GI_RU" ]; then
-    echo "ERROR: GI_RU must point to an extracted RU directory: $GI_RU"
-    exit 1
-fi
+if [ "$UNSUPPORTED_BASE_MODE" = "YES" ]; then
+    echo "WARNING: GI RU and external OPatch media checks are skipped."
+else
+    if [ ! -d "$GI_RU" ]; then
+        echo "ERROR: GI_RU must point to an extracted RU directory: $GI_RU"
+        exit 1
+    fi
 
-if [ ! -f "$GI_OPATCH" ]; then
-    echo "ERROR: OPatch archive not found: $GI_OPATCH"
-    exit 1
+    if [ ! -f "$GI_OPATCH" ]; then
+        echo "ERROR: OPatch archive not found: $GI_OPATCH"
+        exit 1
+    fi
 fi
 
 echo "PASS: Installation media is available."
@@ -143,33 +181,37 @@ fi
 
 echo "=== Update OPatch ==="
 
-CURRENT_OPATCH_VERSION=$(
-    "$GRID_HOME/OPatch/opatch" version 2>/dev/null |
-        awk -F': ' '/OPatch Version/ {print $2}'
-)
-
-if [ "$CURRENT_OPATCH_VERSION" = "$GI_OPATCH_VERSION" ]; then
-    echo "PASS: Required OPatch version is already installed."
+if [ "$UNSUPPORTED_BASE_MODE" = "YES" ]; then
+    echo "WARNING: External OPatch update is skipped."
 else
-    if [ -e "$GRID_HOME/OPatch.base" ]; then
-        echo "ERROR: OPatch backup already exists and the active version is unexpected."
-        exit 1
-    fi
-
-    mv "$GRID_HOME/OPatch" "$GRID_HOME/OPatch.base"
-    unzip -q "$GI_OPATCH" -d "$GRID_HOME"
-
     CURRENT_OPATCH_VERSION=$(
         "$GRID_HOME/OPatch/opatch" version 2>/dev/null |
             awk -F': ' '/OPatch Version/ {print $2}'
     )
 
-    if [ "$CURRENT_OPATCH_VERSION" != "$GI_OPATCH_VERSION" ]; then
-        echo "ERROR: OPatch version does not match GI_OPATCH_VERSION."
-        exit 1
-    fi
+    if [ "$CURRENT_OPATCH_VERSION" = "$GI_OPATCH_VERSION" ]; then
+        echo "PASS: Required OPatch version is already installed."
+    else
+        if [ -e "$GRID_HOME/OPatch.base" ]; then
+            echo "ERROR: OPatch backup already exists and the active version is unexpected."
+            exit 1
+        fi
 
-    echo "PASS: OPatch updated to $CURRENT_OPATCH_VERSION."
+        mv "$GRID_HOME/OPatch" "$GRID_HOME/OPatch.base"
+        unzip -q "$GI_OPATCH" -d "$GRID_HOME"
+
+        CURRENT_OPATCH_VERSION=$(
+            "$GRID_HOME/OPatch/opatch" version 2>/dev/null |
+                awk -F': ' '/OPatch Version/ {print $2}'
+        )
+
+        if [ "$CURRENT_OPATCH_VERSION" != "$GI_OPATCH_VERSION" ]; then
+            echo "ERROR: OPatch version does not match GI_OPATCH_VERSION."
+            exit 1
+        fi
+
+        echo "PASS: OPatch updated to $CURRENT_OPATCH_VERSION."
+    fi
 fi
 
 # ============================================================
@@ -223,7 +265,12 @@ echo "PASS: Temporary response file created."
 
 echo "=== Install Oracle Grid Infrastructure ==="
 
-if [ -n "${GI_ONEOFFS:-}" ]; then
+if [ "$UNSUPPORTED_BASE_MODE" = "YES" ]; then
+    "$GRID_HOME/gridSetup.sh" \
+        -silent \
+        -waitforcompletion \
+        -responseFile "$RESPONSE_FILE"
+elif [ -n "${GI_ONEOFFS:-}" ]; then
     "$GRID_HOME/gridSetup.sh" \
         -silent \
         -waitforcompletion \

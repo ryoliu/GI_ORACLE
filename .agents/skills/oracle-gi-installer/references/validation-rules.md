@@ -23,3 +23,5 @@
 OS 套件、Kernel 需求、Installer 參數、Response File 與 DBCA 選項必須依指定 Oracle 版本的官方文件確認，不得直接沿用其他版本設定。
 
 當 `ENVIRONMENT="PERSONAL_LAB"` 時，只能套用 [個人環境特別注意事項](personal-environment.md) 明確定義的例外；未定義的項目仍使用標準規則。
+
+`ALLOW_UNSUPPORTED_19_3_BASE="YES"` 只允許在 `PERSONAL_LAB` 略過 RU 與外部 OPatch。所有檢查與輸出都必須明確標示此組合不符合 Oracle Linux 9 官方支援條件，不得將警告顯示為成功或通過。

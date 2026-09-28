@@ -12,13 +12,13 @@ Oracle Linux 9（OEL9）
 
 本文件中的規則只適用於 `ENVIRONMENT="PERSONAL_LAB"`。
 
-## Oracle Linux 9 版本與 Patch 必要條件
+## Oracle Linux 9 版本與 Patch 原則
 
 Oracle Linux 9 安裝 Oracle Database 19c 與 Oracle Grid Infrastructure 19c 時，必須使用 Oracle 官方支援的 RU 與相容 OPatch。
 
 Oracle 19.3 Gold Image 只能作為 Base Software 來源，不得在 Oracle Linux 9 上略過必要 RU 後直接視為支援的安裝組合。
 
-`GI_Setup.conf` 必須提供 Base、套用至各 Oracle Home 的 RU，以及相容 OPatch 的版本及位置：
+一般模式必須提供 Base、套用至各 Oracle Home 的 RU，以及相容 OPatch 的版本及位置：
 
 ```bash
 GI_BASE_VERSION="19.3.0.0.0"
@@ -40,11 +40,38 @@ DB_OPATCH="CHANGE_ME"
 
 實際 RU 與 OPatch 版本必須依產生安裝套件當下的 Oracle 官方文件確認，不得只依固定範例版本判斷。
 
-如果無法取得必要 RU 或 OPatch：
+## 無 RU／OPatch 的個人 LAB 例外
+
+無法取得 My Oracle Support Patch 時，可以明確啟用不受支援的 19.3 Base-only LAB 模式：
+
+```bash
+ALLOW_UNSUPPORTED_19_3_BASE="YES"
+
+GI_RU_VERSION=""
+GI_RU=""
+GI_OPATCH_VERSION=""
+GI_OPATCH=""
+
+DB_RU_VERSION=""
+DB_RU=""
+DB_OPATCH_VERSION=""
+DB_OPATCH=""
+```
+
+這個例外必須同時符合：
+
+- `ENVIRONMENT="PERSONAL_LAB"`。
+- `ALLOW_UNSUPPORTED_19_3_BASE="YES"`。
+- GI 與 Database Base Software 仍必須存在。
+- PreCheck 必須顯示不符合 Oracle Linux 9 官方支援條件的警告。
+- GI 與 Database 安裝腳本必須略過外部 OPatch 更新、`-applyRU` 及 Patch Inventory 版本比對。
+- 不得將結果描述為符合 Oracle prerequisite 或 Oracle 支援組合。
+
+如果 RU 或 OPatch 留空，但 `ALLOW_UNSUPPORTED_19_3_BASE` 不是 `YES`：
 
 - `00_PreCheck.sh` 必須顯示錯誤並停止。
 - 不得產生可直接執行且宣稱符合支援條件的 Oracle Linux 9 安裝套件。
-- 不得使用 `PERSONAL_LAB` 略過 OS 與 Oracle 版本相容性要求。
+- RU 與 OPatch 的版本及路徑仍為必要設定。
 
 ## 必要安裝媒體
 
@@ -97,20 +124,12 @@ RAM < 4096 MB
     -> 執行對應處理
 
 版本或路徑未設定
+and PERSONAL_LAB + ALLOW_UNSUPPORTED_19_3_BASE=YES
+    -> 顯示 WARNING
+    -> 略過 OPatch 與 RU
+
+版本或路徑未設定
+and unsupported mode is not enabled
     -> 顯示 ERROR
     -> 停止執行
-```
-
-例如：
-
-```bash
-if [ -z "${GI_RU:-}" ] || [ "$GI_RU" = "CHANGE_ME" ]; then
-    echo "ERROR: GI RU is not configured."
-    exit 1
-fi
-
-if [ ! -e "$GI_RU" ]; then
-    echo "ERROR: GI RU path not found: $GI_RU"
-    exit 1
-fi
 ```

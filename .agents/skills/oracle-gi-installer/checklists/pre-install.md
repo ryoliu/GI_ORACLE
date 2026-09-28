@@ -2,7 +2,9 @@
 
 - [ ] 已確認 Linux 發行版本、版本號與 CPU 架構
 - [ ] 已確認 GI 與 Database Base Software 完整版本
-- [ ] 已確認 GI RU、DB RU 與 OPatch 符合 OS 與 Oracle 版本相容性要求
+- [ ] 已確認使用受支援 Patch 模式，或明確啟用 `PERSONAL_LAB` Base-only 例外
+- [ ] 受支援模式已確認 GI RU、DB RU 與 OPatch 符合 OS 與 Oracle 版本相容性要求
+- [ ] Base-only 例外已確認接受 Oracle Linux 9 不受支援的風險
 - [ ] 已確認使用 Oracle Restart，而不是 RAC
 - [ ] 已確認 Hostname、FQDN、IP 與名稱解析
 - [ ] 已確認 Grid Base、Grid Home、Oracle Base 與 Database Home

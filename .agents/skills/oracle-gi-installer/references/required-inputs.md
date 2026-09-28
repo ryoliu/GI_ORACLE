@@ -9,9 +9,10 @@
 - 確認使用 Oracle Restart，而不是 RAC
 - GI Base Software 完整版本
 - Database Base Software 完整版本
-- GI RU、DB RU 與 OPatch 的版本及檔案位置
-- OS、Oracle Base、RU 與 OPatch 必須構成 Oracle 官方支援的安裝組合
-- 個人 LAB 不得略過版本相容性所需的 RU 或 OPatch；Oracle Linux 9 的要求依 [個人環境特別注意事項](personal-environment.md) 處理
+- 是否啟用 `ALLOW_UNSUPPORTED_19_3_BASE`
+- 一般模式需要 GI RU、DB RU 與 OPatch 的版本及檔案位置
+- 一般模式的 OS、Oracle Base、RU 與 OPatch 必須構成 Oracle 官方支援的安裝組合
+- `PERSONAL_LAB` 明確啟用 Base-only 例外時，RU 與 OPatch 可以留空，但必須標示為不受支援；詳細規則依 [個人環境特別注意事項](personal-environment.md)
 - 套件來源為線上 Repository 或離線安裝媒體
 
 ## 主機與網路

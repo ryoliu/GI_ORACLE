@@ -135,6 +135,7 @@ if ! source "$CONFIG_FILE"; then
 fi
 
 require_value "ENVIRONMENT" "${ENVIRONMENT:-}"
+require_value "ALLOW_UNSUPPORTED_19_3_BASE" "${ALLOW_UNSUPPORTED_19_3_BASE:-}"
 require_value "OS_FAMILY" "${OS_FAMILY:-}"
 require_value "OS_MAJOR_VERSION" "${OS_MAJOR_VERSION:-}"
 require_value "HOST_NAME" "${HOST_NAME:-}"
@@ -146,10 +147,6 @@ require_value "GRID_BASE" "${GRID_BASE:-}"
 require_value "GRID_HOME" "${GRID_HOME:-}"
 require_value "GI_BASE_VERSION" "${GI_BASE_VERSION:-}"
 require_value "GI_SOFTWARE" "${GI_SOFTWARE:-}"
-require_value "GI_RU_VERSION" "${GI_RU_VERSION:-}"
-require_value "GI_RU" "${GI_RU:-}"
-require_value "GI_OPATCH_VERSION" "${GI_OPATCH_VERSION:-}"
-require_value "GI_OPATCH" "${GI_OPATCH:-}"
 require_value "ASM_OSDBA_GROUP" "${ASM_OSDBA_GROUP:-}"
 require_value "ASM_OSASM_GROUP" "${ASM_OSASM_GROUP:-}"
 require_value "ASM_DISCOVERY_STRING" "${ASM_DISCOVERY_STRING:-}"
@@ -163,10 +160,28 @@ require_value "DB_OSRACDBA_GROUP" "${DB_OSRACDBA_GROUP:-}"
 require_value "DB_HOME" "${DB_HOME:-}"
 require_value "DB_BASE_VERSION" "${DB_BASE_VERSION:-}"
 require_value "DB_SOFTWARE" "${DB_SOFTWARE:-}"
-require_value "DB_RU_VERSION" "${DB_RU_VERSION:-}"
-require_value "DB_RU" "${DB_RU:-}"
-require_value "DB_OPATCH_VERSION" "${DB_OPATCH_VERSION:-}"
-require_value "DB_OPATCH" "${DB_OPATCH:-}"
+
+UNSUPPORTED_BASE_MODE="NO"
+
+if [ "$ALLOW_UNSUPPORTED_19_3_BASE" = "YES" ]; then
+    if [ "$ENVIRONMENT" != "PERSONAL_LAB" ]; then
+        fail "Unsupported Base-only mode is allowed only for PERSONAL_LAB."
+    fi
+
+    UNSUPPORTED_BASE_MODE="YES"
+    warn "Oracle 19.3 Base without RU is not supported on Oracle Linux 9."
+elif [ "$ALLOW_UNSUPPORTED_19_3_BASE" = "NO" ]; then
+    require_value "GI_RU_VERSION" "${GI_RU_VERSION:-}"
+    require_value "GI_RU" "${GI_RU:-}"
+    require_value "GI_OPATCH_VERSION" "${GI_OPATCH_VERSION:-}"
+    require_value "GI_OPATCH" "${GI_OPATCH:-}"
+    require_value "DB_RU_VERSION" "${DB_RU_VERSION:-}"
+    require_value "DB_RU" "${DB_RU:-}"
+    require_value "DB_OPATCH_VERSION" "${DB_OPATCH_VERSION:-}"
+    require_value "DB_OPATCH" "${DB_OPATCH:-}"
+else
+    fail "ALLOW_UNSUPPORTED_19_3_BASE must be YES or NO."
+fi
 
 pass "Required configuration values are present."
 
@@ -214,23 +229,27 @@ fi
 
 pass "Kernel is supported: $KERNEL_RELEASE"
 
-if ! version_at_least "$GI_RU_VERSION" "19.19.0.0.0"; then
-    fail "GI RU 19.19 or later is required for Oracle Linux 9."
-fi
+if [ "$UNSUPPORTED_BASE_MODE" = "YES" ]; then
+    warn "RU compatibility checks are skipped for the unsupported PERSONAL_LAB Base-only mode."
+else
+    if ! version_at_least "$GI_RU_VERSION" "19.19.0.0.0"; then
+        fail "GI RU 19.19 or later is required for Oracle Linux 9."
+    fi
 
-if ! version_at_least "$DB_RU_VERSION" "19.19.0.0.0"; then
-    fail "Database RU 19.19 or later is required for Oracle Linux 9."
-fi
+    if ! version_at_least "$DB_RU_VERSION" "19.19.0.0.0"; then
+        fail "Database RU 19.19 or later is required for Oracle Linux 9."
+    fi
 
-if ! version_at_least "$GI_RU_VERSION" "19.22.0.0.0"; then
-    warn "Oracle recommends GI RU 19.22 or later for Oracle Linux 9."
-fi
+    if ! version_at_least "$GI_RU_VERSION" "19.22.0.0.0"; then
+        warn "Oracle recommends GI RU 19.22 or later for Oracle Linux 9."
+    fi
 
-if ! version_at_least "$DB_RU_VERSION" "19.22.0.0.0"; then
-    warn "Oracle recommends Database RU 19.22 or later for Oracle Linux 9."
-fi
+    if ! version_at_least "$DB_RU_VERSION" "19.22.0.0.0"; then
+        warn "Oracle recommends Database RU 19.22 or later for Oracle Linux 9."
+    fi
 
-pass "Configured RU versions meet the Oracle Linux 9 minimum."
+    pass "Configured RU versions meet the Oracle Linux 9 minimum."
+fi
 
 # 3. Hostname, name resolution, and time synchronization
 printf '%s\n' "=== Check host configuration ==="
@@ -370,23 +389,29 @@ if [ ! -f "$DB_SOFTWARE" ]; then
     fail "Database installation file not found: $DB_SOFTWARE"
 fi
 
-if [ ! -e "$GI_RU" ]; then
-    fail "GI RU path not found: $GI_RU"
-fi
+pass "Base installation media exists."
 
-if [ ! -e "$GI_OPATCH" ]; then
-    fail "GI OPatch path not found: $GI_OPATCH"
-fi
+if [ "$UNSUPPORTED_BASE_MODE" = "YES" ]; then
+    warn "RU and external OPatch path checks are skipped for the unsupported PERSONAL_LAB Base-only mode."
+else
+    if [ ! -e "$GI_RU" ]; then
+        fail "GI RU path not found: $GI_RU"
+    fi
 
-if [ ! -e "$DB_RU" ]; then
-    fail "Database RU path not found: $DB_RU"
-fi
+    if [ ! -e "$GI_OPATCH" ]; then
+        fail "GI OPatch path not found: $GI_OPATCH"
+    fi
 
-if [ ! -e "$DB_OPATCH" ]; then
-    fail "Database OPatch path not found: $DB_OPATCH"
-fi
+    if [ ! -e "$DB_RU" ]; then
+        fail "Database RU path not found: $DB_RU"
+    fi
 
-pass "Installation media and patch paths exist."
+    if [ ! -e "$DB_OPATCH" ]; then
+        fail "Database OPatch path not found: $DB_OPATCH"
+    fi
+
+    pass "Patch paths exist."
+fi
 
 # 8. ASM disk visibility
 printf '%s\n' "=== Check ASM disk visibility ==="

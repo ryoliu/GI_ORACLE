@@ -42,6 +42,26 @@ if [ -z "${ENVIRONMENT:-}" ]; then
     exit 1
 fi
 
+if [ -z "${ALLOW_UNSUPPORTED_19_3_BASE:-}" ]; then
+    echo "ERROR: ALLOW_UNSUPPORTED_19_3_BASE is not configured in GI_Setup.conf."
+    exit 1
+fi
+
+UNSUPPORTED_BASE_MODE="NO"
+
+if [ "$ALLOW_UNSUPPORTED_19_3_BASE" = "YES" ]; then
+    if [ "$ENVIRONMENT" != "PERSONAL_LAB" ]; then
+        echo "ERROR: Unsupported Base-only mode is allowed only for PERSONAL_LAB."
+        exit 1
+    fi
+
+    UNSUPPORTED_BASE_MODE="YES"
+    echo "WARNING: Oracle 19.3 Base without RU is not supported on Oracle Linux 9."
+elif [ "$ALLOW_UNSUPPORTED_19_3_BASE" != "NO" ]; then
+    echo "ERROR: ALLOW_UNSUPPORTED_19_3_BASE must be YES or NO."
+    exit 1
+fi
+
 if [ -z "${OS_MAJOR_VERSION:-}" ]; then
     echo "ERROR: OS_MAJOR_VERSION is not configured in GI_Setup.conf."
     exit 1
@@ -67,24 +87,26 @@ if [ -z "${GI_BASE_VERSION:-}" ]; then
     exit 1
 fi
 
-if [ -z "${GI_RU_VERSION:-}" ] || [ "$GI_RU_VERSION" = "CHANGE_ME" ]; then
-    echo "ERROR: GI_RU_VERSION is not configured in GI_Setup.conf."
-    exit 1
-fi
+if [ "$UNSUPPORTED_BASE_MODE" = "NO" ]; then
+    if [ -z "${GI_RU_VERSION:-}" ] || [ "$GI_RU_VERSION" = "CHANGE_ME" ]; then
+        echo "ERROR: GI_RU_VERSION is not configured in GI_Setup.conf."
+        exit 1
+    fi
 
-if [ -z "${GI_RU:-}" ] || [ "$GI_RU" = "CHANGE_ME" ]; then
-    echo "ERROR: GI_RU is not configured in GI_Setup.conf."
-    exit 1
-fi
+    if [ -z "${GI_RU:-}" ] || [ "$GI_RU" = "CHANGE_ME" ]; then
+        echo "ERROR: GI_RU is not configured in GI_Setup.conf."
+        exit 1
+    fi
 
-if [ -z "${GI_OPATCH_VERSION:-}" ] || [ "$GI_OPATCH_VERSION" = "CHANGE_ME" ]; then
-    echo "ERROR: GI_OPATCH_VERSION is not configured in GI_Setup.conf."
-    exit 1
-fi
+    if [ -z "${GI_OPATCH_VERSION:-}" ] || [ "$GI_OPATCH_VERSION" = "CHANGE_ME" ]; then
+        echo "ERROR: GI_OPATCH_VERSION is not configured in GI_Setup.conf."
+        exit 1
+    fi
 
-if [ -z "${GI_OPATCH:-}" ] || [ "$GI_OPATCH" = "CHANGE_ME" ]; then
-    echo "ERROR: GI_OPATCH is not configured in GI_Setup.conf."
-    exit 1
+    if [ -z "${GI_OPATCH:-}" ] || [ "$GI_OPATCH" = "CHANGE_ME" ]; then
+        echo "ERROR: GI_OPATCH is not configured in GI_Setup.conf."
+        exit 1
+    fi
 fi
 
 if [ -z "${DB_BASE_VERSION:-}" ]; then
@@ -92,24 +114,26 @@ if [ -z "${DB_BASE_VERSION:-}" ]; then
     exit 1
 fi
 
-if [ -z "${DB_RU_VERSION:-}" ] || [ "$DB_RU_VERSION" = "CHANGE_ME" ]; then
-    echo "ERROR: DB_RU_VERSION is not configured in GI_Setup.conf."
-    exit 1
-fi
+if [ "$UNSUPPORTED_BASE_MODE" = "NO" ]; then
+    if [ -z "${DB_RU_VERSION:-}" ] || [ "$DB_RU_VERSION" = "CHANGE_ME" ]; then
+        echo "ERROR: DB_RU_VERSION is not configured in GI_Setup.conf."
+        exit 1
+    fi
 
-if [ -z "${DB_RU:-}" ] || [ "$DB_RU" = "CHANGE_ME" ]; then
-    echo "ERROR: DB_RU is not configured in GI_Setup.conf."
-    exit 1
-fi
+    if [ -z "${DB_RU:-}" ] || [ "$DB_RU" = "CHANGE_ME" ]; then
+        echo "ERROR: DB_RU is not configured in GI_Setup.conf."
+        exit 1
+    fi
 
-if [ -z "${DB_OPATCH_VERSION:-}" ] || [ "$DB_OPATCH_VERSION" = "CHANGE_ME" ]; then
-    echo "ERROR: DB_OPATCH_VERSION is not configured in GI_Setup.conf."
-    exit 1
-fi
+    if [ -z "${DB_OPATCH_VERSION:-}" ] || [ "$DB_OPATCH_VERSION" = "CHANGE_ME" ]; then
+        echo "ERROR: DB_OPATCH_VERSION is not configured in GI_Setup.conf."
+        exit 1
+    fi
 
-if [ -z "${DB_OPATCH:-}" ] || [ "$DB_OPATCH" = "CHANGE_ME" ]; then
-    echo "ERROR: DB_OPATCH is not configured in GI_Setup.conf."
-    exit 1
+    if [ -z "${DB_OPATCH:-}" ] || [ "$DB_OPATCH" = "CHANGE_ME" ]; then
+        echo "ERROR: DB_OPATCH is not configured in GI_Setup.conf."
+        exit 1
+    fi
 fi
 
 if [ -z "${ASM_OSDBA_GROUP:-}" ]; then
@@ -295,32 +319,30 @@ echo "OK: Database installation file exists."
 
 echo "=== Check patches ==="
 
-if [ ! -e "$GI_RU" ]; then
-    echo "ERROR: GI RU path not found: $GI_RU"
-    exit 1
+if [ "$UNSUPPORTED_BASE_MODE" = "YES" ]; then
+    echo "WARNING: RU and external OPatch checks are skipped for the unsupported PERSONAL_LAB Base-only mode."
 else
-    echo "OK: GI RU path exists."
-fi
+    if [ ! -e "$GI_RU" ]; then
+        echo "ERROR: GI RU path not found: $GI_RU"
+        exit 1
+    fi
 
-if [ ! -e "$GI_OPATCH" ]; then
-    echo "ERROR: GI OPatch path not found: $GI_OPATCH"
-    exit 1
-else
-    echo "OK: GI OPatch path exists."
-fi
+    if [ ! -e "$GI_OPATCH" ]; then
+        echo "ERROR: GI OPatch path not found: $GI_OPATCH"
+        exit 1
+    fi
 
-if [ ! -e "$DB_RU" ]; then
-    echo "ERROR: Database RU path not found: $DB_RU"
-    exit 1
-else
-    echo "OK: Database RU path exists."
-fi
+    if [ ! -e "$DB_RU" ]; then
+        echo "ERROR: Database RU path not found: $DB_RU"
+        exit 1
+    fi
 
-if [ ! -e "$DB_OPATCH" ]; then
-    echo "ERROR: Database OPatch path not found: $DB_OPATCH"
-    exit 1
-else
-    echo "OK: Database OPatch path exists."
+    if [ ! -e "$DB_OPATCH" ]; then
+        echo "ERROR: Database OPatch path not found: $DB_OPATCH"
+        exit 1
+    fi
+
+    echo "OK: Patch paths exist."
 fi
 
 
